@@ -1,0 +1,111 @@
+### **Autókereskedés weboldal - Adatbázis dokumentáció**
+
+#### **1. Bevezetés**
+Az adatbázis célja, hogy támogassa egy autókereskedés weboldalát, amely különböző márkájú autókat kínál eladásra. Az adatbázisban az autók, márkák, felhasználók, ajánlatok és időpontfoglalások adatai lesznek tárolva. Ebben a dokumentációban egy olyan adatbázis szerkezetét vázoljuk fel, amely 5 különböző autómárkát tartalmaz.
+
+#### **2. Adatbázis követelmények**
+- **Adattárolási szükségletek**:
+  - Autók adatai (márka, modell, ár, futásteljesítmény stb.)
+  - Felhasználók adatai (regisztrált vásárlók és adminisztrátorok)
+  - Kapcsolódó ajánlatok és időpontfoglalások
+- **Cél**: Gyors és hatékony lekérdezés, hogy a felhasználók könnyen böngészhessenek a különböző autók között, illetve kapcsolatba léphessenek a kereskedéssel.
+
+#### **3. Adatbázis táblák**
+Az alábbiakban részletesen bemutatjuk az adatbázis szerkezetét és a táblák közötti kapcsolatokat.
+
+##### **3.1. Márkák (Brands) tábla**
+Ez a tábla az autómárkákat tárolja. Mivel a feladat szerint 5 különböző márkának kell szerepelnie az adatbázisban, ezeket a táblában rögzítjük.
+
+| Oszlop név | Típus | Leírás |
+|------------|-------|--------|
+| `id`       | INT (PK, AUTO_INCREMENT) | Egyedi azonosító |
+| `brand_name` | VARCHAR(50) | A márka neve (pl. Toyota, BMW, Audi, Ford, Mercedes) |
+
+##### **Példa adatok:**
+| id | brand_name |
+|----|------------|
+| 1  | Toyota     |
+| 2  | BMW        |
+| 3  | Audi       |
+| 4  | Ford       |
+| 5  | Mercedes   |
+
+##### **3.2. Autók (Cars) tábla**
+Ez a tábla tartalmazza az autókkal kapcsolatos adatokat. Minden autóhoz hozzá van rendelve egy márka a `brand_id` mezőn keresztül, amely hivatkozik a `Brands` táblára.
+
+| Oszlop név     | Típus              | Leírás |
+|----------------|--------------------|--------|
+| `id`           | INT (PK, AUTO_INCREMENT) | Egyedi azonosító |
+| `brand_id`     | INT (FK)            | Hivatkozás a `Brands` táblára |
+| `model`        | VARCHAR(50)         | Autó modellje (pl. Corolla, X5) |
+| `year`         | INT                 | Évjárat |
+| `price`        | DECIMAL(10,2)       | Ár |
+| `mileage`      | INT                 | Futásteljesítmény (km-ben) |
+| `engine_type`  | VARCHAR(20)         | Motor típusa (pl. benzines, dízel) |
+| `transmission` | VARCHAR(20)         | Váltó típusa (pl. manuális, automata) |
+| `description`  | TEXT                | Autó részletes leírása |
+| `image`        | VARCHAR(255)        | Autó képe (fájlútvonal) |
+
+##### **Példa adatok:**
+| id | brand_id | model    | year | price  | mileage | engine_type | transmission | description                   | image               |
+|----|----------|----------|------|--------|---------|-------------|--------------|-------------------------------|---------------------|
+| 1  | 1        | Corolla  | 2019 | 4000.00| 50000   | Benzines    | Manuális     | Jó állapotú, városi autó       | `corolla.jpg`       |
+| 2  | 2        | X5       | 2021 | 25000.00| 30000  | Dízel       | Automata     | Terepjáró, full extrás         | `x5.jpg`            |
+| 3  | 3        | A3       | 2018 | 15000.00| 40000  | Benzines    | Manuális     | Sportos, városi autó           | `a3.jpg`            |
+
+##### **3.3. Felhasználók (Users) tábla**
+A regisztrált felhasználókat (vásárlók és adminok) ebben a táblában tároljuk.
+
+| Oszlop név   | Típus              | Leírás |
+|--------------|--------------------|--------|
+| `id`         | INT (PK, AUTO_INCREMENT) | Egyedi azonosító |
+| `username`   | VARCHAR(50)         | Felhasználónév |
+| `password`   | VARCHAR(255)        | Jelszó (titkosítva) |
+| `email`      | VARCHAR(100)        | E-mail cím |
+| `role`       | ENUM('user', 'admin')| Felhasználói szerepkör |
+
+##### **Példa adatok:**
+| id | username | password        | email              | role  |
+|----|----------|-----------------|--------------------|-------|
+| 1  | user1    | hash_password_1 | user1@example.com   | user  |
+| 2  | admin1   | hash_password_2 | admin1@example.com  | admin |
+
+##### **3.4. Ajánlatok (Offers) tábla**
+Ebben a táblában a felhasználók által tett ajánlatok vannak tárolva az autókra vonatkozóan.
+
+| Oszlop név   | Típus              | Leírás |
+|--------------|--------------------|--------|
+| `id`         | INT (PK, AUTO_INCREMENT) | Egyedi azonosító |
+| `user_id`    | INT (FK)            | Hivatkozás a `Users` táblára |
+| `car_id`     | INT (FK)            | Hivatkozás a `Cars` táblára |
+| `offer_amount` | DECIMAL(10,2)     | Ajánlott ár |
+
+##### **Példa adatok:**
+| id | user_id | car_id | offer_amount |
+|----|---------|--------|--------------|
+| 1  | 1       | 2      | 24000.00     |
+| 2  | 2       | 3      | 14000.00     |
+
+##### **3.5. Időpontfoglalások (Appointments) tábla**
+Ebben a táblában a felhasználók által foglalt időpontok vannak tárolva, amikor megtekinthetik az autót.
+
+| Oszlop név      | Típus              | Leírás |
+|-----------------|--------------------|--------|
+| `id`            | INT (PK, AUTO_INCREMENT) | Egyedi azonosító |
+| `user_id`       | INT (FK)            | Hivatkozás a `Users` táblára |
+| `car_id`        | INT (FK)            | Hivatkozás a `Cars` táblára |
+| `appointment_date` | DATETIME         | Foglalt időpont |
+
+##### **Példa adatok:**
+| id | user_id | car_id | appointment_date     |
+|----|---------|--------|----------------------|
+| 1  | 1       | 2      | 2024-10-10 10:00:00  |
+| 2  | 2       | 3      | 2024-10-12 14:30:00  |
+
+#### **4. Kapcsolatok a táblák között**
+- A **`Cars`** tábla `brand_id` mezője kapcsolatban áll a **`Brands`** táblával (1:N kapcsolat).
+- A **`Offers`** tábla kapcsolatot létesít a **`Users`** és a **`Cars`** táblákkal, jelezve, hogy egy felhasználó milyen autóra tett ajánlatot (N:N kapcsolat, de két 1:N kapcsolattal oldjuk meg).
+- Az **`Appointments`** tábla kapcsolatban áll a **`Users`** és a **`Cars`** táblákkal, ahol egy felhasználó egy adott autóhoz foglal időpontot (szintén N:N kapcsolat két 1:N kapcsolaton keresztül).
+
+#### **5. Konklúzió**
+Az adatbázis felépítése biztosítja a különböző márkájú autók kezelését, a felhasználók interakcióját az autókkal (ajánlatok és időpontfoglalások), valamint az adminisztrátori funkciókat. Ez
